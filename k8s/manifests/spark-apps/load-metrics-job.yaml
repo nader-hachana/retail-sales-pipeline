@@ -1,0 +1,46 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: load-metrics
+  namespace: airflow
+spec:
+  type: Scala
+  mode: cluster
+  sparkVersion: "3.5.1"
+  image: load_metrics:latest
+  imagePullPolicy: Never
+  mainClass: com.batchpipeline.load.Main
+  mainApplicationFile: "local:///opt/app.jar"
+  restartPolicy:
+    type: Never
+  driver:
+    cores: 2
+    coreLimit: "2"
+    memory: "3g"
+    serviceAccount: spark-operator-spark
+    env:
+      - name: CASSANDRA_HOST
+        value: "cassandra"
+      - name: CASSANDRA_PORT
+        value: "9042"
+    volumeMounts:
+      - name: transformations
+        mountPath: /opt/transformations
+        readOnly: true
+  executor:
+    cores: 2
+    coreLimit: "2"
+    memory: "1g"
+    env:
+      - name: CASSANDRA_HOST
+        value: "cassandra"
+      - name: CASSANDRA_PORT
+        value: "9042"
+    volumeMounts:
+      - name: transformations
+        mountPath: /opt/transformations
+        readOnly: true
+  volumes:
+    - name: transformations
+      persistentVolumeClaim:
+        claimName: metrics-pvc

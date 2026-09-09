@@ -1,5 +1,0 @@
-path|fileName|columnMappingFilePath|header|keyspace|table|writemode
-/data/|datagen_0.parquet|/schema_configuration/datagen.conf|false|sales|datagen_0_v1|append
-/data/|forecasts.parquet|/schema_configuration/forecasts.conf|true|sales|forecasts_v1|append
-/data/|calendar.parquet|/schema_configuration/calendar.conf|true|sales|calendar_v1|append
-/data/|products.parquet|/schema_configuration/products.conf|true|sales|products_v1|append

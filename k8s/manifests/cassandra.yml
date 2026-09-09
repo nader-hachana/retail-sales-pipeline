@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet # To maintain the database state and its data
+metadata:
+  name: cassandra
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+      name: cassandra
+    spec:
+      containers:
+        - name: cassandra
+          image: cassandra:5.0
+          # without a resource limit, Cassandra sizes its JVM heap off the
+          # node's total visible memory rather than what the pod actually
+          # gets, and gets OOMKilled almost immediately on a shared KinD
+          # node. Pin the heap explicitly and keep it well under the limit.
+          env:
+            - name: MAX_HEAP_SIZE
+              value: "512M"
+            - name: HEAP_NEWSIZE
+              value: "128M"
+          resources:
+            requests:
+              memory: "1.5Gi"
+            limits:
+              memory: "2Gi"
+          ports:
+            - containerPort: 9042
+          readinessProbe:
+            exec:
+              command: ["cqlsh", "-e", "describe keyspaces"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 20
+          volumeMounts:
+            - name: cassandra-data
+              mountPath: /var/lib/cassandra
+      volumes:
+        - name: cassandra-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra
+  namespace: airflow
+spec:
+  selector:
+    app: cassandra
+  ports:
+    - protocol: TCP
+      port: 9042
+      targetPort: 9042

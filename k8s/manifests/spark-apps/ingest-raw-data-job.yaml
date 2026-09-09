@@ -1,0 +1,46 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: ingest-raw-data
+  namespace: airflow
+spec:
+  type: Scala
+  mode: cluster
+  sparkVersion: "3.5.1"
+  image: ingest_raw_data:latest
+  imagePullPolicy: Never
+  mainClass: com.batchpipeline.ingest.Main
+  mainApplicationFile: "local:///opt/app.jar"
+  restartPolicy:
+    type: Never
+  driver:
+    cores: 2
+    coreLimit: "2"
+    memory: "2g"
+    serviceAccount: spark-operator-spark
+    env:
+      - name: CASSANDRA_HOST
+        value: "cassandra"
+      - name: CASSANDRA_PORT
+        value: "9042"
+    volumeMounts:
+      - name: raw-data
+        mountPath: /data/raw
+        readOnly: true
+  executor:
+    cores: 2
+    coreLimit: "2"
+    memory: "1g"
+    env:
+      - name: CASSANDRA_HOST
+        value: "cassandra"
+      - name: CASSANDRA_PORT
+        value: "9042"
+    volumeMounts:
+      - name: raw-data
+        mountPath: /data/raw
+        readOnly: true
+  volumes:
+    - name: raw-data
+      persistentVolumeClaim:
+        claimName: raw-data-pvc

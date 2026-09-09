@@ -1,0 +1,36 @@
+# SparkKubernetesOperator/Sensor tasks actually run as the airflow-worker
+# service account (each task is its own ephemeral pod under
+# KubernetesExecutor, using the chart's worker pod template), and
+# `airflow tasks test` separately runs in-process as airflow-scheduler - but
+# neither the vendored airflow chart nor the vendored spark-operator chart
+# grants either account any permission on the SparkApplication CRD itself
+# (spark-operator's own spark-rbac.yaml only covers what a Spark driver pod
+# needs - pods/services/configmaps/pvcs - not managing SparkApplication
+# objects). Without this, submitting or polling a SparkApplication fails
+# with a 403 Forbidden.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-spark-application-manager
+  namespace: airflow
+rules:
+  - apiGroups: ["sparkoperator.k8s.io"]
+    resources: ["sparkapplications"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: airflow-spark-application-manager
+  namespace: airflow
+subjects:
+  - kind: ServiceAccount
+    name: airflow-worker
+    namespace: airflow
+  - kind: ServiceAccount
+    name: airflow-scheduler
+    namespace: airflow
+roleRef:
+  kind: Role
+  name: airflow-spark-application-manager
+  apiGroup: rbac.authorization.k8s.io

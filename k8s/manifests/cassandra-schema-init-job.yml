@@ -1,0 +1,38 @@
+# The ConfigMap this Job mounts is not defined here: generate it from the
+# single source of truth (infra/cassandra/schema.cql) instead of duplicating
+# the schema into a second, driftable copy:
+#
+#   kubectl create configmap cassandra-schema \
+#     --from-file=schema.cql=infra/cassandra/schema.cql \
+#     --namespace airflow
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cassandra-schema-init
+  namespace: airflow
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-cassandra
+          image: cassandra:5.0
+          command:
+            [
+              "sh",
+              "-c",
+              "until cqlsh cassandra -e 'describe keyspaces'; do echo waiting for cassandra; sleep 5; done",
+            ]
+      containers:
+        - name: cassandra-schema-init
+          image: cassandra:5.0
+          command: ["cqlsh", "cassandra", "-f", "/schema.cql"]
+          volumeMounts:
+            - name: schema
+              mountPath: /schema.cql
+              subPath: schema.cql
+      volumes:
+        - name: schema
+          configMap:
+            name: cassandra-schema

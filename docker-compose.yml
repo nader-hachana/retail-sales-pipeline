@@ -1,0 +1,62 @@
+services:
+  cassandra:
+    image: cassandra:5.0
+    container_name: bpa-cassandra
+    ports:
+      - "9042:9042"
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - ./infra/cassandra/schema.cql:/schema.cql:ro
+
+  cassandra-init:
+    image: cassandra:5.0
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    entrypoint: ["cqlsh", "bpa-cassandra", "-f", "/schema.cql"]
+    volumes:
+      - ./infra/cassandra/schema.cql:/schema.cql:ro
+
+  ingest_raw_data:
+    build: ./jobs/ingest_raw_data
+    depends_on:
+      cassandra-init:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=bpa-cassandra
+    volumes:
+      - ./data/raw:/data/raw:ro
+
+  validate_raw_data:
+    build: ./jobs/validate_raw_data
+    depends_on:
+      cassandra-init:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=bpa-cassandra
+
+  compute_metrics:
+    build: ./jobs/compute_metrics
+    depends_on:
+      ingest_raw_data:
+        condition: service_completed_successfully
+      validate_raw_data:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=bpa-cassandra
+    volumes:
+      - ./data/transformations:/opt/transformations
+
+  load_metrics:
+    build: ./jobs/load_metrics
+    depends_on:
+      compute_metrics:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=bpa-cassandra
+    volumes:
+      - ./data/transformations:/opt/transformations:ro

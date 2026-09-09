@@ -1,9 +1,0 @@
-path|fileName|writemode|delimiter|keyspace|table|columns|primary_key|clustering_key
-/opt/transformations/|price_transf.parq|append|,|sales_metrics|price_transf|tenant_id:int;sku:int;store_id:int;price:frozen<list<frozen<tuple<date, float>>>>|tenant_id,sku|store_id
-/opt/transformations/|total_sales.parq|append|,|sales_metrics|total_sales|tenant_id:int;sku:int;promo_cat:text;promo_disc:text;total_sales_promo_prod:int|tenant_id,sku,promo_cat,promo_disc|
-/opt/transformations/|weekly_sales.parq|append|,|sales_metrics|weekly_sales|tenant_id:int;purch_week:int;sku:int;store_id:int;promo_cat:text;promo_disc:text;weekly_sales:int|tenant_id,purch_week,sku,store_id|promo_cat,promo_disc,weekly_sales
-/opt/transformations/|baseline.parq|append|,|sales_metrics|baseline|tenant_id:int;sku:int;store_id:int;baseline:float|tenant_id,sku,store_id|
-/opt/transformations/|lift.parq|append|,|sales_metrics|lift|tenant_id:int;purch_week:int;sku:int;store_id:int;promo_cat:text;promo_disc:text;weekly_sales:int;baseline:float;lift_unit:float;lift_percentage:float|tenant_id,purch_week,sku,store_id|promo_cat,promo_disc
-/opt/transformations/|sales_error.parq|append|,|sales_metrics|sales_error|tenant_id:int;purch_week:int;sku:int;store_id:int;promo_cat:text;promo_disc:text;weekly_sales:int;prediction:float;error:float|tenant_id,purch_week,sku,store_id|
-/opt/transformations/|absolute_diff.parq|append|,|sales_metrics|absolute_diff|tenant_id:int;purch_week:int;sku:int;store_id:int;promo_cat:text;promo_disc:text;weekly_sales:int;prediction:float;absolute_diff:float|tenant_id,purch_week,sku,store_id|
-/opt/transformations/|profit_error.parq|append|,|sales_metrics|profit_error|tenant_id:int;purch_week:int;sku:int;store_id:int;promo_cat:text;promo_disc:text;weekly_sales:int;prediction:float;prod_base_price:float;profit_error:float|tenant_id,purch_week,sku,store_id|

@@ -1,0 +1,61 @@
+# The raw sales data comes from scripts/fetch_data.py running on the host,
+# outside the cluster, so it has to be fed in via hostPath rather than
+# dynamic provisioning: nothing else can seed a fresh volume with files that
+# already exist on the host filesystem. k8s/kind-config.yaml mounts this
+# repo's ./data directory to /data on the KinD node (see its extraMounts),
+# so this path lines up with docker-compose's own ./data/raw. This is a
+# local single-node-cluster shortcut, not a pattern for a real cluster: a
+# multi-node or cloud cluster would read this data straight from object
+# storage (S3/GCS) instead of shipping it through a node-local volume.
+#
+# No `type: DirectoryOrCreate` here on purpose: if ./data/raw doesn't exist
+# yet, ingest-raw-data should fail loudly on a missing path rather than
+# silently mount an empty directory.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: raw-data-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: /data/raw
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: raw-data-pvc
+  namespace: airflow
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+# compute_metrics creates this data fresh every run, so unlike raw-data
+# there's nothing to pre-seed from the host: this uses KinD's built-in
+# dynamic "standard" StorageClass (rancher.io/local-path) instead of a
+# hand-written PersistentVolume.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: metrics-pvc
+  namespace: airflow
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

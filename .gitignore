@@ -1,24 +1,23 @@
+# real source data, fetched via scripts/fetch_data.py, not committed
+data/
+.data_source/
+
+# sbt / scala build output, root project and every job under jobs/
+target/
+project/target/
+project/project/
+jobs/*/target/
+jobs/*/project/target/
+jobs/*/project/project/
+
+# editor/tooling
+.metals/
+.bloop/
+.vscode/
 *.txt
-.metals
-.vscode
 
-loading_raw_data/project/project
-loading_raw_data/project/target
-loading_raw_data/target
-loading_raw_data/data
+# spark / job scratch output
+jobs/*/col.csv
+transformations/
 
-checking_data_quality/project/project
-checking_data_quality/project/target
-checking_data_quality/target
-
-processing_data/project/project
-processing_data/project/target
-processing_data/target
-processing_data/col.csv
-
-loading_transf_data/project/project
-loading_transf_data/project/target
-loading_transf_data/target
-
-transformations
-
+.DS_Store

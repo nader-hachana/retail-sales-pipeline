@@ -1,0 +1,4 @@
+keyspace|table|key_columns|critical_columns
+sales|raw_sales|sku,invoice_date,invoice_id|quantity,unit_price
+sales|raw_products|sku|min_price,max_price
+sales|raw_calendar|date|year,month

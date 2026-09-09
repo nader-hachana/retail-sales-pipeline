@@ -1,0 +1,5 @@
+# Vendored third-party Helm charts (Airflow, Spark Operator), not part of
+# this project's own code. Their Go-template YAML gets misread as Mustache
+# by GitHub's language detector and would otherwise swamp the real
+# language stats.
+k8s/helm/** linguist-vendored

@@ -1,0 +1,83 @@
+# Overrides for running the vendored Airflow chart on a local KinD cluster.
+# Most of this trims the chart down to what a single-DAG local demo actually
+# needs (no Celery workers/Redis, no triggerer, no metrics exporter); the
+# postgres and Airflow-version fixes further down address real bugs hit
+# while standing this up locally, not just resource sizing.
+#
+# Usage: helm install airflow ./k8s/helm/airflow --namespace airflow -f k8s/airflow-local-values.yaml
+
+# Task pods are launched on demand by KubernetesExecutor; there's no
+# persistent Celery worker fleet to keep resident (also drops the Redis
+# broker the CeleryExecutor would otherwise need).
+executor: KubernetesExecutor
+
+# This DAG has no deferrable operators, so the triggerer does nothing here.
+triggerer:
+  enabled: false
+
+# A metrics exporter isn't needed for a local demo.
+statsd:
+  enabled: false
+
+config:
+  webserver:
+    # Airflow's default of 4 gunicorn workers is generous for a single-DAG
+    # local demo and was pushing this stack past what an 8GB Docker Desktop
+    # VM can spare during startup.
+    workers: "1"
+
+webserver:
+  resources:
+    requests:
+      memory: "1Gi"
+    limits:
+      memory: "1.5Gi"
+
+scheduler:
+  resources:
+    requests:
+      memory: "1Gi"
+    limits:
+      memory: "1.5Gi"
+
+# k8s/Dockerfile bumps the base image to 2.5.2 (see its comment) to fix a
+# real upstream bug (apache/airflow#29841) that made the 2.5.1 webserver
+# consume unbounded memory and get OOMKilled before it could even start.
+# These just keep the chart's own version-gated CLI syntax in sync.
+airflowVersion: "2.5.2"
+defaultAirflowTag: "2.5.2"
+
+# The chart's default probe execs `pg_isready` inside the container on every
+# check, which means kubelet asking the container runtime to fork a new
+# process each time. On this nested-virtualization setup (Docker Desktop VM
+# -> KinD node container -> containerd) that fork occasionally never gets
+# scheduled in time at all ("no attempt" in kubelet's own probe log), and a
+# healthy postgres gets killed anyway - raising the timeout didn't help
+# because the probe wasn't running long, it wasn't running at all. A
+# tcpSocket probe is checked directly by kubelet with no exec involved, and
+# is honestly a better fit than an exec probe for a "is something listening
+# on 5432" check regardless of environment.
+postgresql:
+  # the chart leaves auth.password unset, but the Bitnami entrypoint still
+  # generates a random value for the POSTGRES_PASSWORD env var and uses that
+  # for the live database, while the Secret Airflow actually connects with
+  # is built from auth.postgresPassword ("postgres") - the two never
+  # matched, causing a real, reproducible "password authentication failed"
+  # on every fresh volume. Setting both to the same value fixes it.
+  auth:
+    password: postgres
+  primary:
+    customLivenessProbe:
+      tcpSocket:
+        port: 5432
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    customReadinessProbe:
+      tcpSocket:
+        port: 5432
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6

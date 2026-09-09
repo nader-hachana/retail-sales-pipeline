@@ -1,0 +1,11 @@
+# Run `kind create cluster --config k8s/kind-config.yaml` from the repo
+# root: extraMounts resolves hostPath relative to the current directory.
+# Only ./data/raw needs a host mount (see k8s/manifests/volumes.yml) -
+# compute_metrics's output lives on a dynamically-provisioned PVC instead.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: ./data/raw
+        containerPath: /data/raw
