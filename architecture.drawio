@@ -1,0 +1,87 @@
+<mxfile host="Electron">
+  <diagram name="Architecture" id="arch1">
+    <mxGraphModel dx="1849" dy="1241" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2100" pageHeight="620" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="composebox" parent="1" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="150" width="2190" x="250" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="airflow" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Airflow: batch_pipeline_automation DAG (Kubernetes, via Spark Operator)&#xa;SparkKubernetesOperator submits each job as a SparkApplication,&#xa;SparkKubernetesSensor polls completion before the next task starts" vertex="1">
+          <mxGeometry height="70" width="1480" x="610" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="junction" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="8" x="1346" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="trunk" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;exitX=0.5;exitY=0;" target="junction" value="orchestrates">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="204.05" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b1" edge="1" parent="1" source="junction" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="dxKPYNB6929ggKnQo0CV-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" edge="1" parent="1" source="junction" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="dxKPYNB6929ggKnQo0CV-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="204.05" />
+            </Array>
+            <mxPoint x="1060" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b3" edge="1" parent="1" source="junction" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="dxKPYNB6929ggKnQo0CV-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1380" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b4" edge="1" parent="1" source="junction" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="dxKPYNB6929ggKnQo0CV-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="UCI Online Retail II&#xa;~1.07M real transactions&#xa;fetch_data.py -&gt; raw CSVs" vertex="1">
+          <mxGeometry height="70" width="200" x="290" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="ingest_raw_data&#xa;raw CSVs -&gt; Cassandra" vertex="1">
+          <mxGeometry height="70" width="200" x="610" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Cassandra&#xa;sales.raw_sales, raw_products,&#xa;raw_calendar" vertex="1">
+          <mxGeometry height="70" width="200" x="930" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="validate_raw_data&#xa;missing/incorrect value checks" vertex="1">
+          <mxGeometry height="70" width="200" x="1250" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="compute_metrics&#xa;weekly sales, promo lift,&#xa;trailing forecast" vertex="1">
+          <mxGeometry height="70" width="200" x="1570" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="load_metrics&#xa;parquet -&gt; Cassandra" vertex="1">
+          <mxGeometry height="70" width="200" x="1890" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Cassandra&#xa;sales_metrics.weekly_sales,&#xa;baseline, lift, price_history" vertex="1">
+          <mxGeometry height="70" width="200" x="2210" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-8" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-2" value="downloads">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-9" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-3" value="writes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-10" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-4" value="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-11" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-5" value="must pass first">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-12" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-5" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-6" value="parquet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-13" edge="1" parent="1" source="dxKPYNB6929ggKnQo0CV-6" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="dxKPYNB6929ggKnQo0CV-7" value="writes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dxKPYNB6929ggKnQo0CV-14" parent="1" style="text;html=1;align=left;verticalAlign=top;fontStyle=1" value="Docker Compose (local): same 4 jobs, sequential depends_on, no separate orchestrator" vertex="1">
+          <mxGeometry height="20" width="620" x="290" y="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -4,6 +4,8 @@ Batch pipeline for retail sales analytics: ingest raw sales data, validate it, c
 
 [![CI](https://github.com/nader-hachana/retail-sales-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/nader-hachana/retail-sales-pipeline/actions/workflows/ci.yml)
 
+![Architecture](architecture.png)
+
 ## Data
 
 [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii): about 1.07M real transactions from a UK-based online retailer.
@@ -20,16 +22,6 @@ Four Spark jobs, run in sequence:
 2. **validate_raw_data**: checks each table for missing or incorrect values.
 3. **compute_metrics**: computes weekly sales, promo lift, and a trailing sales forecast.
 4. **load_metrics**: writes the computed metrics back into Cassandra.
-
-```
-raw CSVs -> [ingest_raw_data] -> Cassandra (sales.*)
-                                       |
-                              [validate_raw_data]
-                                       |
-                              [compute_metrics] -> parquet
-                                       |
-                               [load_metrics] -> Cassandra (sales_metrics.*)
-```
 
 ## Run it
 

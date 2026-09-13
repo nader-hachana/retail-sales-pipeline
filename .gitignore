@@ -16,6 +16,9 @@ jobs/*/project/project/
 .vscode/
 *.txt
 
+# draw.io lock/backup file left behind while a diagram is open
+.$*.drawio.bkp
+
 # spark / job scratch output
 jobs/*/col.csv
 transformations/
